@@ -120,25 +120,24 @@ def make_analysis(generator):
     test_X = generator[0][0]
     test_y = generator.classes
 
-    predicted_y = model.predict(test_X)
-    probs = model.predict_proba(test_X).round(2)
-
-    labels = np.vstack((test_y, predicted_y))
-    results = np.hstack((probs, labels.T))
+    probs = model.predict(test_X)
+    top_prediction = probs.argsort(axis = 1)[::-1][:,0]
+    top_prediction.reshape(1, -1)
+    print (test_y, top_prediction)
 
     classes = {0:'cucumber beetle' , 1: 'Japanese beetle', 2: 'ladybug'}
 
-    score = balanced_accuracy_score(test_y, predicted_y)
+    score = balanced_accuracy_score(test_y, top_prediction)
 
     wrong_indices = []
 
-    for i, prediction in enumerate(predicted_y):
+    for i, prediction in enumerate(top_prediction):
         if prediction != test_y[i]:
             wrong_indices.append(i)
 
     # for index in wrong_indices:
     #     plt.imshow((test_X[index]/2+0.5))
-    #     plt.text(0.05, 0.95, f'I thought this was a {classes[predicted_y[index]]} \n but it was a {classes[test_y[index]]}', fontsize=14,
+    #     plt.text(0.05, 0.95, f'I thought this was a {classes[top_prediction[index]]} \n but it was a {classes[test_y[index]]}', fontsize=14,
     #     verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
     #     plt.show()
 
@@ -147,12 +146,15 @@ def make_analysis(generator):
 def show_confusion(generator):
     test_X = generator[0][0]
     test_y = generator.classes
-    predicted_y = model.predict_classes(test_X)
+
+    probs = model.predict(test_X)
+    top_prediction = probs.argsort(axis = 1)[::-1][:,0]
+    top_prediction.reshape(1, -1)
 
     class_names = ['cucumber beetle' , 'Japanese beetle',  'ladybug']
 
     # Compute confusion matrix
-    cnf_matrix = confusion_matrix(test_y, predicted_y)
+    cnf_matrix = confusion_matrix(test_y, top_prediction)
     np.set_printoptions(precision=2)
 
     print(cnf_matrix)
@@ -172,13 +174,6 @@ if __name__ == '__main__':
     train_directory = "../../images/select/train"
     test_directory = "../../images/select/holdout"
     validation_directory = "../../images/select/validation"
-
-    # model = create_model(3, 100, 100, 3)
-    #
-    # model.compile(loss='categorical_crossentropy',
-    #               optimizer='adadelta',
-    #               metrics=['accuracy'])
-    #
 
     model = create_transfer_model((200,200,3),3)
 
@@ -201,23 +196,23 @@ if __name__ == '__main__':
         model.compile(optimizer=RMSprop(lr=0.0005), loss='categorical_crossentropy', metrics=['accuracy'])
 
         model.fit_generator(train_generator,
-                steps_per_epoch=200,
-                epochs=10,
+                steps_per_epoch=20,
+                epochs=1,
                 validation_data=validation_generator,
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
-        _ = change_trainable_layers(model, 102)
-        model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+        # _ = change_trainable_layers(model, 126)
+        # model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+        #
+        # model.fit_generator(train_generator,
+        #         steps_per_epoch=200,
+        #         epochs=10,
+        #         validation_data=validation_generator,
+        #         validation_steps=1, callbacks=[checkpointer, tensorboard])
+        # model.load_weights('../../tmp/'+ts+'.hdf5')
 
-        model.fit_generator(train_generator,
-                steps_per_epoch=200,
-                epochs=10,
-                validation_data=validation_generator,
-                validation_steps=1, callbacks=[checkpointer, tensorboard])
-        model.load_weights('../../tmp/'+ts+'.hdf5')
-
-    #score = make_analysis(validation_generator)
-    #print(f'balanced accuracy score is {score}')
+    score = make_analysis(validation_generator)
+    print(f'balanced accuracy score is {score}')
 
     show_confusion(validation_generator)
