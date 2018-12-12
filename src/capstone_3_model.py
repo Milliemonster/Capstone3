@@ -196,21 +196,21 @@ if __name__ == '__main__':
         model.compile(optimizer=RMSprop(lr=0.0005), loss='categorical_crossentropy', metrics=['accuracy'])
 
         model.fit_generator(train_generator,
-                steps_per_epoch=20,
-                epochs=1,
+                steps_per_epoch=200,
+                epochs=10,
                 validation_data=validation_generator,
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
-        # _ = change_trainable_layers(model, 126)
-        # model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
-        #
-        # model.fit_generator(train_generator,
-        #         steps_per_epoch=200,
-        #         epochs=10,
-        #         validation_data=validation_generator,
-        #         validation_steps=1, callbacks=[checkpointer, tensorboard])
-        # model.load_weights('../../tmp/'+ts+'.hdf5')
+        _ = change_trainable_layers(model, 126)
+        model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+        model.fit_generator(train_generator,
+                steps_per_epoch=200,
+                epochs=10,
+                validation_data=validation_generator,
+                validation_steps=1, callbacks=[checkpointer, tensorboard])
+        model.load_weights('../../tmp/'+ts+'.hdf5')
 
     score = make_analysis(validation_generator)
     print(f'balanced accuracy score is {score}')
