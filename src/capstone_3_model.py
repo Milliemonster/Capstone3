@@ -4,11 +4,20 @@ import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout
+from keras.models import Model
+from keras.applications import Xception
+from keras.preprocessing.image import img_to_array, load_img
+from keras.models import Model
+from keras.optimizers import SGD, RMSprop
+from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.layers.convolutional import Conv2D
 from keras.utils import np_utils
 from keras import backend as K
 #from image_process_cs2 import data_preprocess
 from keras.applications.xception import preprocess_input
+from keras.applications import Xception
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from sklearn.utils import class_weight
@@ -148,9 +157,9 @@ def show_confusion(generator):
 
     print(cnf_matrix)
     # Plot non-normalized confusion matrix
-    plt.figure()
-    plot_confusion_matrix(cnf_matrix, classes=class_names,
-                          title='Confusion matrix, without normalization')
+    # plt.figure()
+    # plot_confusion_matrix(cnf_matrix, classes=class_names,
+    #                       title='Confusion matrix, without normalization')
 
     # Plot normalized confusion matrix
     plt.figure()
@@ -171,24 +180,35 @@ if __name__ == '__main__':
     #               metrics=['accuracy'])
     #
 
-    model = create_transfer_model((100,100,3),3)
-    change_trainable_layers(model, 132)
-
-    model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+    model = create_transfer_model((200,200,3),3)
 
     ts = str(datetime.datetime.now().timestamp())
     checkpointer = ModelCheckpoint(filepath='../../tmp/'+ts+'.hdf5', verbose=1, save_best_only=True)
     tensorboard = TensorBoard(
                 log_dir='logs/', histogram_freq=0, batch_size=50, write_graph=True, embeddings_freq=0)
 
-    train_generator, test_generator, validation_generator = generate_data(train_directory, validation_directory, test_directory, 100, 100)
+    train_generator, test_generator, validation_generator = generate_data(train_directory, validation_directory, test_directory, 200, 200)
 
     load = input("Load saved weights? (y/n) ")
 
     if load.lower() == 'y':
+        model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
         model.load_weights("../../tmp/stable11.hdf5")
         print("weights loaded")
+
     elif load.lower() == 'n':
+        change_trainable_layers(model, 132)
+        model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+        model.fit_generator(train_generator,
+                steps_per_epoch=200,
+                epochs=15,
+                validation_data=validation_generator,
+                validation_steps=1, callbacks=[checkpointer, tensorboard])
+
+        change_trainable_layers(model, 102)
+        model.compile(optimizer=RMSprop(lr=0.002), loss='categorical_crossentropy', metrics=['accuracy'])
+
         model.fit_generator(train_generator,
                 steps_per_epoch=200,
                 epochs=15,
