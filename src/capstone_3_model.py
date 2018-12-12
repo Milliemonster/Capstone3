@@ -122,7 +122,7 @@ def make_analysis(generator):
     probs = model.predict(test_X)
     top_prediction = probs.argsort(axis = 1)[::-1][:,0]
     top_prediction.reshape(1, -1)
-    print (test_y, top_prediction)
+    print (probs)
 
     classes = {0:'cucumber beetle' , 1: 'Japanese beetle', 2: 'ladybug'}
 
