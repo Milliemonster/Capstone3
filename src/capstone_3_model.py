@@ -82,7 +82,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         #save_to_dir = "japanese_beetle/train",
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=32,
+        batch_size=16,
         class_mode="categorical",
         shuffle=True,
         seed=42
