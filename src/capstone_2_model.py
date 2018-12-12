@@ -7,7 +7,7 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers.convolutional import Conv2D
 from keras.utils import np_utils
 from keras import backend as K
-from image_process_cs2 import data_preprocess
+#from image_process_cs2 import data_preprocess
 from keras.applications.xception import preprocess_input
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, TensorBoard
