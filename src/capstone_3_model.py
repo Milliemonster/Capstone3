@@ -120,9 +120,10 @@ def make_analysis(generator):
     test_y = generator.classes
 
     probs = model.predict(test_X)
-    top_prediction = probs.argsort(axis = 1)[::-1][:,0]
+    indices = probs.argsort(axis = 1)
+    top_prediction = np.flip(indices, 1)[:, 0]
     top_prediction.reshape(1, -1)
-    print (probs)
+    print (probs, top_prediction)
 
     classes = {0:'cucumber beetle' , 1: 'Japanese beetle', 2: 'ladybug'}
 
@@ -147,7 +148,8 @@ def show_confusion(generator):
     test_y = generator.classes
 
     probs = model.predict(test_X)
-    top_prediction = probs.argsort(axis = 1)[::-1][:,0]
+    indices = probs.argsort(axis = 1)
+    top_prediction = np.flip(indices, 1)[:, 0]
     top_prediction.reshape(1, -1)
 
     class_names = ['cucumber beetle' , 'Japanese beetle',  'ladybug']
