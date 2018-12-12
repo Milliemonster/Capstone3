@@ -14,57 +14,34 @@ from keras.callbacks import ModelCheckpoint, TensorBoard
 from sklearn.utils import class_weight
 from sklearn.metrics import balanced_accuracy_score
 import matplotlib
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from plot_confusion_matrix import plot_confusion_matrix
 from sklearn.metrics import confusion_matrix
 import datetime
 from keras import backend as K
 K.tensorflow_backend._get_available_gpus()
+ts = str(datetime.datetime.now().timestamp())
+matplotlib.use('agg')
 
-def create_model(nb_classes, img_rows, img_cols, img_layers):
-    '''assembles CNN model layers
-    inputs: number of classes, image size (rows, cols, layers)
-    outputs: model
-    '''
+def create_transfer_model(input_size, n_categories, weights = 'imagenet'):
 
-    nb_filters = 24
-    pool_size = (2, 2)
-    kernel_size = (4, 4)
-    input_shape = (img_rows, img_cols, img_layers)
+        base_model = Xception(weights=weights,
+                          include_top=False,
+                          input_shape=input_size)
 
-    model = Sequential()
+        model = base_model.output
+        model = GlobalAveragePooling2D()(model)
+        predictions = Dense(n_categories, activation='softmax')(model)
+        model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.add(Conv2D(nb_filters, (4, 4), padding='valid', input_shape=input_shape))
-    model.add(Activation('relu'))
-    model.add(Conv2D(nb_filters, (4, 4), padding='valid'))
-    model.add(Activation('relu'))
+        return model
 
-    model.add(MaxPooling2D(pool_size=pool_size))
-    model.add(Dropout(0.3))
+def change_trainable_layers(model, trainable_index):
 
-    model.add(Conv2D(nb_filters, (3, 3), padding='valid'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(nb_filters, (1, 5), padding='valid'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(nb_filters, (5, 1), padding='valid'))
-    model.add(Activation('relu'))
-
-    model.add(MaxPooling2D(pool_size=pool_size))
-    model.add(Dropout(0.3))
-
-    model.add(Flatten())
-    shape = int(model.output_shape[1]*0.8)
-
-    model.add(Dense(shape))
-    model.add(Activation('relu'))
-
-    model.add(Dropout(0.3))
-
-    model.add(Dense(nb_classes))
-    model.add(Activation('softmax'))
-
-    return model
+    for layer in model.layers[:trainable_index]:
+        layer.trainable = False
+    for layer in model.layers[trainable_index:]:
+        layer.trainable = True
 
 def generate_data(train_directory, validation_directory, test_directory, img_rows, img_cols, mode = 'rgb'):
     '''creates data generators for train, validation and test data
@@ -180,21 +157,27 @@ def show_confusion(generator):
     plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
                           title='Normalized confusion matrix')
 
-    plt.show()
+    plt.savefig('./'+ts+'confusion_matrix.png')
 
 if __name__ == '__main__':
     train_directory = "../../images/select/train"
     test_directory = "../../images/select/holdout"
     validation_directory = "../../images/select/validation"
 
-    model = create_model(3, 100, 100, 3)
+    # model = create_model(3, 100, 100, 3)
+    #
+    # model.compile(loss='categorical_crossentropy',
+    #               optimizer='adadelta',
+    #               metrics=['accuracy'])
+    #
 
-    model.compile(loss='categorical_crossentropy',
-                  optimizer='adadelta',
-                  metrics=['accuracy'])
+    model = create_transfer_model((100,100,3),3)
+    change_trainable_layers(model, 132)
+
+    model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
 
     ts = str(datetime.datetime.now().timestamp())
-    checkpointer = ModelCheckpoint(filepath='./tmp/'+ts+'.hdf5', verbose=1, save_best_only=True)
+    checkpointer = ModelCheckpoint(filepath='../../tmp/'+ts+'.hdf5', verbose=1, save_best_only=True)
     tensorboard = TensorBoard(
                 log_dir='logs/', histogram_freq=0, batch_size=50, write_graph=True, embeddings_freq=0)
 
@@ -203,7 +186,7 @@ if __name__ == '__main__':
     load = input("Load saved weights? (y/n) ")
 
     if load.lower() == 'y':
-        model.load_weights("./tmp/stable11.hdf5")
+        model.load_weights("../../tmp/stable11.hdf5")
         print("weights loaded")
     elif load.lower() == 'n':
         model.fit_generator(train_generator,
@@ -211,7 +194,7 @@ if __name__ == '__main__':
                 epochs=15,
                 validation_data=validation_generator,
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
-        model.load_weights('./tmp/'+ts+'.hdf5')
+        model.load_weights('../../tmp/'+ts+'.hdf5')
 
     score = make_analysis(validation_generator)
     print(f'balanced accuracy score is {score}')

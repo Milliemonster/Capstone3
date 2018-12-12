@@ -14,13 +14,14 @@ from keras.callbacks import ModelCheckpoint, TensorBoard
 from sklearn.utils import class_weight
 from sklearn.metrics import balanced_accuracy_score
 import matplotlib
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from plot_confusion_matrix import plot_confusion_matrix
 from sklearn.metrics import confusion_matrix
 import datetime
 from keras import backend as K
 K.tensorflow_backend._get_available_gpus()
+ts = str(datetime.datetime.now().timestamp())
+matplotlib.use('agg')
 
 def create_model(nb_classes, img_rows, img_cols, img_layers):
     '''assembles CNN model layers
@@ -165,11 +166,10 @@ def show_confusion(generator):
 
     class_names = ['cucumber beetle' , 'Japanese beetle',  'ladybug']
 
-    # Compute confusion matrix
     cnf_matrix = confusion_matrix(test_y, predicted_y)
     np.set_printoptions(precision=2)
-
     print(cnf_matrix)
+
     # Plot non-normalized confusion matrix
     plt.figure()
     plot_confusion_matrix(cnf_matrix, classes=class_names,
@@ -180,7 +180,7 @@ def show_confusion(generator):
     plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
                           title='Normalized confusion matrix')
 
-    plt.show()
+    plt.savefig('./'+ts+'confusion_matrix.png')
 
 if __name__ == '__main__':
     train_directory = "../../images/select/train"
@@ -194,7 +194,7 @@ if __name__ == '__main__':
                   metrics=['accuracy'])
 
     ts = str(datetime.datetime.now().timestamp())
-    checkpointer = ModelCheckpoint(filepath='./tmp/'+ts+'.hdf5', verbose=1, save_best_only=True)
+    checkpointer = ModelCheckpoint(filepath='../../tmp/'+ts+'.hdf5', verbose=1, save_best_only=True)
     tensorboard = TensorBoard(
                 log_dir='logs/', histogram_freq=0, batch_size=50, write_graph=True, embeddings_freq=0)
 
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     load = input("Load saved weights? (y/n) ")
 
     if load.lower() == 'y':
-        model.load_weights("./tmp/stable11.hdf5")
+        model.load_weights("../../tmp/stable11.hdf5")
         print("weights loaded")
     elif load.lower() == 'n':
         model.fit_generator(train_generator,
@@ -211,7 +211,7 @@ if __name__ == '__main__':
                 epochs=15,
                 validation_data=validation_generator,
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
-        model.load_weights('./tmp/'+ts+'.hdf5')
+        model.load_weights('../../tmp/'+ts+'.hdf5')
 
     score = make_analysis(validation_generator)
     print(f'balanced accuracy score is {score}')
