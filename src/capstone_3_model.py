@@ -82,7 +82,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         #save_to_dir = "japanese_beetle/train",
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=16,
+        batch_size=32,
         class_mode="categorical",
         shuffle=True,
         seed=42
@@ -202,21 +202,22 @@ if __name__ == '__main__':
 
         model.fit_generator(train_generator,
                 steps_per_epoch=200,
-                epochs=15,
+                epochs=10,
                 validation_data=validation_generator,
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
+        model.load_weights('../../tmp/'+ts+'.hdf5')
 
         change_trainable_layers(model, 102)
         model.compile(optimizer=RMSprop(lr=0.002), loss='categorical_crossentropy', metrics=['accuracy'])
 
         model.fit_generator(train_generator,
                 steps_per_epoch=200,
-                epochs=15,
+                epochs=10,
                 validation_data=validation_generator,
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
-    score = make_analysis(validation_generator)
-    print(f'balanced accuracy score is {score}')
+    #score = make_analysis(validation_generator)
+    #print(f'balanced accuracy score is {score}')
 
     show_confusion(validation_generator)
