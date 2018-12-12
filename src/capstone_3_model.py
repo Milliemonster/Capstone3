@@ -15,7 +15,6 @@ from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.layers.convolutional import Conv2D
 from keras.utils import np_utils
 from keras import backend as K
-#from image_process_cs2 import data_preprocess
 from keras.applications.xception import preprocess_input
 from keras.applications import Xception
 from keras.preprocessing.image import ImageDataGenerator
@@ -188,7 +187,7 @@ if __name__ == '__main__':
 
     if load.lower() == 'y':
         model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
-        model.load_weights("../../tmp/stable11.hdf5")
+        model.load_weights("../../tmp/1544650331.785638.hdf5")
         print("weights loaded")
 
     elif load.lower() == 'n':

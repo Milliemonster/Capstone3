@@ -1,4 +1,7 @@
 """
+
+Code source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html#sphx-glr-auto-examples-model-selection-plot-confusion-matrix-py
+
 ================
 Confusion matrix
 ================
@@ -23,8 +26,6 @@ In real life applications this parameter is usually chosen
 using :ref:`grid_search`.
 
 """
-
-print(__doc__)
 
 import itertools
 import numpy as np
