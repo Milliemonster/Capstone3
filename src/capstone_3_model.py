@@ -120,7 +120,7 @@ def make_analysis(generator):
     test_X = generator[0][0]
     test_y = generator.classes
 
-    predicted_y = model.predict_classes(test_X)
+    predicted_y = model.predict(test_X)
     probs = model.predict_proba(test_X).round(2)
 
     labels = np.vstack((test_y, predicted_y))
@@ -197,8 +197,8 @@ if __name__ == '__main__':
         print("weights loaded")
 
     elif load.lower() == 'n':
-        change_trainable_layers(model, 132)
-        model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+        _ = change_trainable_layers(model, 132)
+        model.compile(optimizer=RMSprop(lr=0.0005), loss='categorical_crossentropy', metrics=['accuracy'])
 
         model.fit_generator(train_generator,
                 steps_per_epoch=200,
@@ -207,8 +207,8 @@ if __name__ == '__main__':
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
-        change_trainable_layers(model, 102)
-        model.compile(optimizer=RMSprop(lr=0.002), loss='categorical_crossentropy', metrics=['accuracy'])
+        _ = change_trainable_layers(model, 102)
+        model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
 
         model.fit_generator(train_generator,
                 steps_per_epoch=200,
