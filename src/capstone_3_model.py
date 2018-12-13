@@ -60,10 +60,10 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
 
     train_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
-        shear_range=0.2,
-        zoom_range=0.2,
-        width_shift_range = 0.2,
-        height_shift_range = 0.2,
+        shear_range=0.25,
+        zoom_range=0.25,
+        width_shift_range = 0.25,
+        height_shift_range = 0.25,
         horizontal_flip = True,
         vertical_flip = True
         )
@@ -140,6 +140,7 @@ def make_analysis(generator):
         plt.text(0.05, 0.95, f'Predicted: {classes[top_prediction[index]]} \n Actual: {classes[test_y[index]]}', fontsize=14,
         verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
         plt.savefig('./result_images/'+ts+str(index)+'miss.png')
+        plt.clf()
 
     return score
 
@@ -212,13 +213,13 @@ if __name__ == '__main__':
     test_directory = "../../images/select/holdout"
     validation_directory = "../../images/select/validation"
 
-    model = create_transfer_model((200,200,3),6)
+    model = create_transfer_model((299,299,3),6)
 
     checkpointer = ModelCheckpoint(filepath='../../tmp/'+ts+'.hdf5', verbose=1, save_best_only=True)
     tensorboard = TensorBoard(
                 log_dir='logs/', histogram_freq=0, batch_size=50, write_graph=True, embeddings_freq=0)
 
-    train_generator, test_generator, validation_generator = generate_data(train_directory, validation_directory, test_directory, 200, 200)
+    train_generator, test_generator, validation_generator = generate_data(train_directory, validation_directory, test_directory, 299, 299)
 
     load = input("Load saved weights? (y/n) ")
 
