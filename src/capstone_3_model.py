@@ -215,7 +215,7 @@ if __name__ == '__main__':
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
-    score = make_analysis(test_generator)
+    score = make_analysis(validation_generator)
     print(f'balanced accuracy score is {score}')
 
-    show_confusion(test_generator)
+    show_confusion(validation_generator)
