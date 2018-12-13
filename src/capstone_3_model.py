@@ -123,9 +123,9 @@ def make_analysis(generator):
     indices = probs.argsort(axis = 1)
     top_prediction = np.flip(indices, 1)[:, 0]
     top_prediction.reshape(1, -1)
-    print (probs, top_prediction)
 
-    classes = {0:'cucumber beetle' , 1: 'Japanese beetle', 2: 'ladybug'}
+    classes = {0:'box elder beetle', 1:'cucumber beetle', 2:'emerald ash borer',
+                3:'Japanese beetle',  4:'ladybug', 5:'striped cucumber beetle' }
 
     score = balanced_accuracy_score(test_y, top_prediction)
 
@@ -152,7 +152,8 @@ def show_confusion(generator):
     top_prediction = np.flip(indices, 1)[:, 0]
     top_prediction.reshape(1, -1)
 
-    class_names = ['cucumber beetle' , 'Japanese beetle',  'ladybug']
+    class_names = ['box elder beetle', 'cucumber beetle','emerald ash borer',
+                'Japanese beetle', 'ladybug', 'striped cucumber beetle']
 
     # Compute confusion matrix
     cnf_matrix = confusion_matrix(test_y, top_prediction)
@@ -173,14 +174,34 @@ def show_confusion(generator):
 
     plt.savefig('./result_images/'+ts+'normalized_confusion_matrix.png')
 
+def fit_model(model):
+    _ = change_trainable_layers(model, 132)
+    model.compile(optimizer=RMSprop(lr=0.0005), loss='categorical_crossentropy', metrics=['accuracy'])
+
+    model.fit_generator(train_generator,
+            steps_per_epoch=200,
+            epochs=10,
+            validation_data=validation_generator,
+            validation_steps=1, callbacks=[checkpointer, tensorboard])
+    model.load_weights('../../tmp/'+ts+'.hdf5')
+
+    _ = change_trainable_layers(model, 126)
+    model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+    model.fit_generator(train_generator,
+            steps_per_epoch=200,
+            epochs=10,
+            validation_data=validation_generator,
+            validation_steps=1, callbacks=[checkpointer, tensorboard])
+    return model
+
 if __name__ == '__main__':
     train_directory = "../../images/select/train"
     test_directory = "../../images/select/holdout"
     validation_directory = "../../images/select/validation"
 
-    model = create_transfer_model((200,200,3),3)
+    model = create_transfer_model((200,200,3),6)
 
-    ts = str(datetime.datetime.now().timestamp())
     checkpointer = ModelCheckpoint(filepath='../../tmp/'+ts+'.hdf5', verbose=1, save_best_only=True)
     tensorboard = TensorBoard(
                 log_dir='logs/', histogram_freq=0, batch_size=50, write_graph=True, embeddings_freq=0)
@@ -195,24 +216,7 @@ if __name__ == '__main__':
         print("weights loaded")
 
     elif load.lower() == 'n':
-        _ = change_trainable_layers(model, 132)
-        model.compile(optimizer=RMSprop(lr=0.0005), loss='categorical_crossentropy', metrics=['accuracy'])
-
-        model.fit_generator(train_generator,
-                steps_per_epoch=200,
-                epochs=10,
-                validation_data=validation_generator,
-                validation_steps=1, callbacks=[checkpointer, tensorboard])
-        model.load_weights('../../tmp/'+ts+'.hdf5')
-
-        _ = change_trainable_layers(model, 126)
-        model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
-
-        model.fit_generator(train_generator,
-                steps_per_epoch=200,
-                epochs=10,
-                validation_data=validation_generator,
-                validation_steps=1, callbacks=[checkpointer, tensorboard])
+        model = fit_model(model)
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
     score = make_analysis(validation_generator)
