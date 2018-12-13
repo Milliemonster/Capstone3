@@ -135,11 +135,11 @@ def make_analysis(generator):
         if prediction != test_y[i]:
             wrong_indices.append(i)
 
-    # for index in wrong_indices:
-    #     plt.imshow((test_X[index]/2+0.5))
-    #     plt.text(0.05, 0.95, f'I thought this was a {classes[top_prediction[index]]} \n but it was a {classes[test_y[index]]}', fontsize=14,
-    #     verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-    #     plt.show()
+    for index in wrong_indices:
+        plt.imshow((test_X[index]/2+0.5))
+        plt.text(0.05, 0.95, f'Predicted: {classes[top_prediction[index]]} \n Actual: {classes[test_y[index]]}', fontsize=14,
+        verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        plt.savefig('./result_images/'+ts+str(index)+'miss.png')
 
     return score
 
@@ -159,17 +159,19 @@ def show_confusion(generator):
     np.set_printoptions(precision=2)
 
     print(cnf_matrix)
-    # Plot non-normalized confusion matrix
-    # plt.figure()
-    # plot_confusion_matrix(cnf_matrix, classes=class_names,
-    #                       title='Confusion matrix, without normalization')
+    #Plot non-normalized confusion matrix
+    plt.figure()
+    plot_confusion_matrix(cnf_matrix, classes=class_names,
+                          title='Confusion matrix, without normalization')
+
+    plt.savefig('./result_images/'+ts+'confusion_matrix.png')
 
     # Plot normalized confusion matrix
     plt.figure()
     plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
                           title='Normalized confusion matrix')
 
-    plt.savefig('./'+ts+'confusion_matrix.png')
+    plt.savefig('./result_images/'+ts+'normalized_confusion_matrix.png')
 
 if __name__ == '__main__':
     train_directory = "../../images/select/train"
@@ -213,7 +215,7 @@ if __name__ == '__main__':
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
-    score = make_analysis(validation_generator)
+    score = make_analysis(test_generator)
     print(f'balanced accuracy score is {score}')
 
-    show_confusion(validation_generator)
+    show_confusion(test_generator)
