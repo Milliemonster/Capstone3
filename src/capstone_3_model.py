@@ -91,7 +91,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         directory=validation_directory,
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=138,
+        batch_size=224,
         class_mode="categorical",
         shuffle=False,
         seed=42
@@ -101,7 +101,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         directory=test_directory,
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=65,
+        batch_size=113,
         class_mode="categorical",
         shuffle=False,
         seed=42
@@ -180,7 +180,7 @@ def fit_model(model):
 
     model.fit_generator(train_generator,
             steps_per_epoch=200,
-            epochs=10,
+            epochs=5,
             validation_data=validation_generator,
             validation_steps=1, callbacks=[checkpointer, tensorboard])
     model.load_weights('../../tmp/'+ts+'.hdf5')
@@ -190,9 +190,21 @@ def fit_model(model):
 
     model.fit_generator(train_generator,
             steps_per_epoch=200,
+            epochs=5,
+            validation_data=validation_generator,
+            validation_steps=1, callbacks=[checkpointer, tensorboard])
+    model.load_weights('../../tmp/'+ts+'.hdf5')
+
+    _ = change_trainable_layers(model, 116)
+    model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+    model.fit_generator(train_generator,
+            steps_per_epoch=200,
             epochs=10,
             validation_data=validation_generator,
             validation_steps=1, callbacks=[checkpointer, tensorboard])
+    model.load_weights('../../tmp/'+ts+'.hdf5')
+
     return model
 
 if __name__ == '__main__':
