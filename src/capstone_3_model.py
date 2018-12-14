@@ -1,14 +1,10 @@
 import numpy as np
 np.random.seed(42)
 import pandas as pd
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D
-from keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout
-from keras.models import Model
+from keras.models import Sequential, Model
+from keras.layers import Dense, Dropout, Activation, Flatten, Convolution2D, MaxPooling2D, GlobalAveragePooling2D
 from keras.applications import Xception
 from keras.preprocessing.image import img_to_array, load_img
-from keras.models import Model
 from keras.optimizers import SGD, RMSprop
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, TensorBoard
@@ -17,7 +13,6 @@ from keras.utils import np_utils
 from keras import backend as K
 from keras.applications.xception import preprocess_input
 from keras.applications import Xception
-from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from sklearn.utils import class_weight
 from sklearn.metrics import balanced_accuracy_score
@@ -26,10 +21,11 @@ import matplotlib.pyplot as plt
 from plot_confusion_matrix import plot_confusion_matrix
 from sklearn.metrics import confusion_matrix
 import datetime
+import pickle
 from keras import backend as K
 K.tensorflow_backend._get_available_gpus()
 ts = str(datetime.datetime.now().timestamp())
-matplotlib.use('agg')
+#matplotlib.use('agg')
 
 def create_transfer_model(input_size, n_categories, weights = 'imagenet'):
 
@@ -225,14 +221,17 @@ if __name__ == '__main__':
 
     if load.lower() == 'y':
         model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
-        model.load_weights("../../tmp/1544650331.785638.hdf5")
+        model.load_weights("../../tmp/1544721035.51357.hdf5")
         print("weights loaded")
 
     elif load.lower() == 'n':
         model = fit_model(model)
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
-    score = make_analysis(validation_generator)
+    score = make_analysis(test_generator)
     print(f'balanced accuracy score is {score}')
 
-    show_confusion(validation_generator)
+    show_confusion(test_generator)
+
+    with open('../../tmp/CS3_model.pickle', 'wb') as fileobject:
+        pickle.dump(model, fileobject)
