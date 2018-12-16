@@ -55,7 +55,8 @@ def create_model(nb_classes, img_rows, img_cols, img_layers):
     model.add(Dropout(0.3))
 
     model.add(Flatten())
-    shape = int(model.output_shape[1]*0.8)
+    #shape = int(model.output_shape[1]*0.8)
+    shape = 8000
 
     model.add(Dense(shape))
     model.add(Activation('relu'))
@@ -141,7 +142,8 @@ def make_analysis(generator):
     labels = np.vstack((test_y, predicted_y))
     results = np.hstack((probs, labels.T))
 
-    classes = {0:'cucumber beetle' , 1: 'Japanese beetle', 2: 'ladybug'}
+    classes = {0:'box elder beetle', 1:'cucumber beetle', 2:'emerald ash borer',
+                3:'Japanese beetle',  4:'ladybug', 5:'striped cucumber beetle' }
 
     score = balanced_accuracy_score(test_y, predicted_y)
 
@@ -151,11 +153,11 @@ def make_analysis(generator):
         if prediction != test_y[i]:
             wrong_indices.append(i)
 
-    # for index in wrong_indices:
-    #     plt.imshow((test_X[index]/2+0.5))
-    #     plt.text(0.05, 0.95, f'I thought this was a {classes[predicted_y[index]]} \n but it was a {classes[test_y[index]]}', fontsize=14,
-    #     verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-    #     plt.show()
+    for index in wrong_indices:
+        plt.imshow((test_X[index]/2+0.5))
+        plt.text(0.05, 0.95, f'Predicted: {classes[predicted_y[index]]} \n Actual: {classes[test_y[index]]}', fontsize=14,
+        verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        plt.show()
 
     return score
 
@@ -175,19 +177,20 @@ def show_confusion(generator):
     plot_confusion_matrix(cnf_matrix, classes=class_names,
                           title='Confusion matrix, without normalization')
 
+    plt.savefig('./'+ts+'confusion_matrix.png')
     # Plot normalized confusion matrix
     plt.figure()
     plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
                           title='Normalized confusion matrix')
 
-    plt.savefig('./'+ts+'confusion_matrix.png')
+    plt.savefig('./'+ts+'normalized_confusion_matrix.png')
 
 if __name__ == '__main__':
     train_directory = "../../images/select/train"
     test_directory = "../../images/select/holdout"
     validation_directory = "../../images/select/validation"
 
-    model = create_model(3, 100, 100, 3)
+    model = create_model(6, 100, 100, 3)
 
     model.compile(loss='categorical_crossentropy',
                   optimizer='adadelta',
@@ -216,4 +219,4 @@ if __name__ == '__main__':
     score = make_analysis(validation_generator)
     print(f'balanced accuracy score is {score}')
 
-    show_confusion(validation_generator)
+    show_confusion(test_generator)

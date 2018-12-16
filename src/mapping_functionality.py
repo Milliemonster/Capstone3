@@ -6,10 +6,10 @@ import pickle
 from PIL.ExifTags import TAGS, GPSTAGS
 from PIL import Image
 import boto3
+import matplotlib as mpl
 
 
 def gps_find(info):
-
 
     if info.get(34853, None) == None:
         return None
@@ -22,6 +22,15 @@ def gps_find(info):
         return pd.DataFrame([{'latitude':coordinates[0], 'longitude':-1*coordinates[1]}])
 
 def plot_map(coordinates):
+    mpl.rcParams.update({
+        'font.size'           : 20.0,
+        'axes.titlesize'      : 'x-large',
+        'axes.labelsize'      : 'medium',
+        'xtick.labelsize'     : 'medium',
+        'ytick.labelsize'     : 'medium',
+        'legend.fontsize'     : 'large',
+    })
+
     lats = coordinates.latitude.values
     lons = coordinates.longitude.values
 
@@ -39,6 +48,8 @@ def plot_map(coordinates):
     m.drawmapboundary()
 
     x, y = m(lons, lats)
+
+    plt.title('Japanese beetle observations')
     m.plot(x, y, 'r.')
 
     return(m)
@@ -47,21 +58,21 @@ if __name__ == '__main__':
 
     s3 = boto3.resource("s3")
     s3.Bucket('image-location-data').download_file('testfile', 'gps_pickle')
-    gps_df = pickle.load(open("gps_pickle", "rb" ) )
-    #gps_pickle.close()
+    with open("gps_pickle", 'rb') as fileobject:
+        gps_df = pickle.load(fileobject)
 
     # add new data to df
-    image = Image.open("/Users/millie/downloads/DSC09521.jpg")
+    image = Image.open("/Users/millie/downloads/20181129_132810.jpg")
     info = image._getexif()
     coordinates = gps_find(info)
-    if coordinates != None:
+    if coordinates is not None:
         gps_df = gps_df.append(coordinates)
     print(gps_df)
     new_map = plot_map(gps_df)
     plt.savefig('beetle_map')
 
-    pickle.dump(gps_df, open("gps_pickle", "wb" ))
-    #gps_pickle.close()
+    with open("gps_pickle", "wb") as fileobject:
+        pickle.dump(gps_df, fileobject)
 
     s3 = boto3.client("s3")
     s3.upload_file('gps_pickle', 'image-location-data', 'testfile')
