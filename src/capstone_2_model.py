@@ -142,7 +142,7 @@ def make_analysis(generator):
     labels = np.vstack((test_y, predicted_y))
     results = np.hstack((probs, labels.T))
 
-    classes = {0:'box elder beetle', 1:'cucumber beetle', 2:'emerald ash borer',
+    classes = {0:'box elder beetle', 1:'spotted cucumber beetle', 2:'emerald ash borer',
                 3:'Japanese beetle',  4:'ladybug', 5:'striped cucumber beetle' }
 
     score = balanced_accuracy_score(test_y, predicted_y)
@@ -166,7 +166,8 @@ def show_confusion(generator):
     test_y = generator.classes
     predicted_y = model.predict_classes(test_X)
 
-    class_names = ['cucumber beetle' , 'Japanese beetle',  'ladybug']
+    class_names = ['box elder beetle', 'spotted cucumber beetle', 'emerald ash borer',
+                'Japanese beetle',  'ladybug', 'striped cucumber beetle' ]
 
     cnf_matrix = confusion_matrix(test_y, predicted_y)
     np.set_printoptions(precision=2)
