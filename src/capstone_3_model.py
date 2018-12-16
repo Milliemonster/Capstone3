@@ -87,7 +87,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         directory=validation_directory,
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=224,
+        batch_size=228,
         class_mode="categorical",
         shuffle=False,
         seed=42
@@ -175,10 +175,11 @@ def fit_model(model):
     _ = change_trainable_layers(model, 132)
     model.compile(optimizer=RMSprop(lr=0.0005), loss='categorical_crossentropy', metrics=['accuracy'])
 
+    class_weights = {0: 0.4, 1: 0.47, 2: 0.69, 3: 0.41, 4:0.45, 5: 1}
     model.fit_generator(train_generator,
             steps_per_epoch=200,
             epochs=5,
-            validation_data=validation_generator,
+            validation_data=validation_generator,class_weight = class_weights,
             validation_steps=1, callbacks=[checkpointer, tensorboard])
     model.load_weights('../../tmp/'+ts+'.hdf5')
 

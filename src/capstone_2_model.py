@@ -108,7 +108,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         directory=validation_directory,
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=216,
+        batch_size=228,
         class_mode="categorical",
         shuffle=False,
         seed=42
@@ -118,7 +118,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         directory=test_directory,
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=125,
+        batch_size=113,
         class_mode="categorical",
         shuffle=False,
         seed=42
@@ -178,13 +178,13 @@ def show_confusion(generator):
     plot_confusion_matrix(cnf_matrix, classes=class_names,
                           title='Confusion matrix, without normalization')
 
-    plt.savefig('./'+ts+'confusion_matrix.png')
+    plt.savefig('./result_images/'+ts+'confusion_matrix.png')
     # Plot normalized confusion matrix
     plt.figure()
     plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
                           title='Normalized confusion matrix')
 
-    plt.savefig('./'+ts+'normalized_confusion_matrix.png')
+    plt.savefig('./result_images/'+ts+'normalized_confusion_matrix.png')
 
 if __name__ == '__main__':
     train_directory = "../../images/select/train"
@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
     load = input("Load saved weights? (y/n) ")
 
-    class_weights = {0: 0.4, 1: 0.5, 2: 0.68, 3: 0.41, 4:0.47, 5: 1}
+    class_weights = {0: 0.4, 1: 0.47, 2: 0.69, 3: 0.41, 4:0.45, 5: 1}
     if load.lower() == 'y':
         model.load_weights("../../tmp/1544934745.431147.hdf5")
         print("weights loaded")
