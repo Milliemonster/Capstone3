@@ -206,6 +206,7 @@ if __name__ == '__main__':
 
     load = input("Load saved weights? (y/n) ")
 
+    class_weights = {0: 0.4, 1: 0.5, 2: 0.68, 3: 0.41, 4:0.47, 5: 1}
     if load.lower() == 'y':
         model.load_weights("../../tmp/1544930861.618361.hdf5")
         print("weights loaded")
@@ -213,7 +214,7 @@ if __name__ == '__main__':
         model.fit_generator(train_generator,
                 steps_per_epoch=200,
                 epochs=15,
-                validation_data=validation_generator,
+                validation_data=validation_generator, class_weight = class_weights,
                 validation_steps=1, callbacks=[checkpointer, tensorboard])
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
