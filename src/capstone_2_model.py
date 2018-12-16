@@ -207,7 +207,7 @@ if __name__ == '__main__':
     load = input("Load saved weights? (y/n) ")
 
     if load.lower() == 'y':
-        model.load_weights("../../tmp/stable11.hdf5")
+        model.load_weights("../../tmp/1544930861.618361.hdf5")
         print("weights loaded")
     elif load.lower() == 'n':
         model.fit_generator(train_generator,
