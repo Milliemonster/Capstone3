@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
     class_weights = {0: 0.4, 1: 0.5, 2: 0.68, 3: 0.41, 4:0.47, 5: 1}
     if load.lower() == 'y':
-        model.load_weights("../../tmp/1544930861.618361.hdf5")
+        model.load_weights("../../tmp/1544934745.431147.hdf5")
         print("weights loaded")
     elif load.lower() == 'n':
         model.fit_generator(train_generator,
