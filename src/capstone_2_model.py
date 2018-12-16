@@ -108,7 +108,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         directory=validation_directory,
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=138,
+        batch_size=216,
         class_mode="categorical",
         shuffle=False,
         seed=42
@@ -118,7 +118,7 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
         directory=test_directory,
         target_size=(img_rows, img_cols),
         color_mode=mode,
-        batch_size=65,
+        batch_size=125,
         class_mode="categorical",
         shuffle=False,
         seed=42
