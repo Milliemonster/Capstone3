@@ -1,6 +1,8 @@
 """
+This code was provided as an example from scikit learn and is being used without modifications
 
-Code sourced from: https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html#sphx-glr-auto-examples-model-selection-plot-confusion-matrix-py
+Source:
+https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
 
 ================
 Confusion matrix

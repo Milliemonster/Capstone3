@@ -28,7 +28,19 @@ ts = str(datetime.datetime.now().timestamp())
 #matplotlib.use('agg')
 
 def create_transfer_model(input_size, n_categories, weights = 'imagenet'):
+    '''
+    Builds transfer learning model based on Xception https://arxiv.org/abs/1610.02357
 
+    Parameters
+    ----------
+    input_size: tuple
+    n_categories: int
+    weights: hf5 file
+
+    Returns
+    -------
+    model: Keras model
+    '''
         base_model = Xception(weights=weights,
                           include_top=False,
                           input_shape=input_size)
@@ -41,18 +53,39 @@ def create_transfer_model(input_size, n_categories, weights = 'imagenet'):
         return model
 
 def change_trainable_layers(model, trainable_index):
+    '''
+    Changes the number of layers that are available for training
+    beginning with trainable_index
 
+    Parameters
+    ----------
+    model: Keras model
+    trainable_index: int
+
+    '''
     for layer in model.layers[:trainable_index]:
         layer.trainable = False
     for layer in model.layers[trainable_index:]:
         layer.trainable = True
 
 def generate_data(train_directory, validation_directory, test_directory, img_rows, img_cols, mode = 'rgb'):
-    '''creates data generators for train, validation and test data
-        inputs: paths to image data. Folders should be named with the target.
-                image size (row, cols) and color mode
-        outputs: three data generators.
-        '''
+    '''
+    Creates data generators for train, validation and test data
+    Input strings are paths to image data. Folders should be named with the target.
+
+    Parameters
+    ----------
+    train_directory: str
+    validation_directory: str
+    test_directory: str
+    img_rows: int
+    img_cols: int
+    mode: str
+
+    Returns
+    -------
+    train_generator, test_generator, validation_generator: Keras ImageDataGenerators
+    '''
 
     train_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
@@ -108,8 +141,14 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
 def make_analysis(generator):
     '''
     Computes accuracy of model and displays labeled images for incorrect guesses.
-    inputs: test data generator
-    outputs: balanced accuracy score
+
+    Parameters
+    ----------
+    generator: Keras ImageDataGenerator
+
+    Returns
+    -------
+    score: int
     '''
 
     test_X = generator[0][0]
@@ -141,6 +180,14 @@ def make_analysis(generator):
     return score
 
 def show_confusion(generator):
+    '''
+    Plots confusion matrix for model predictions
+
+    Parameters
+    ----------
+    generator: Keras ImageDataGenerator
+
+    '''
     test_X = generator[0][0]
     test_y = generator.classes
 
@@ -172,6 +219,18 @@ def show_confusion(generator):
     plt.savefig('./result_images/'+ts+'normalized_confusion_matrix.png')
 
 def fit_model(model):
+    '''
+    Fits the model to the training data. Uses weighted classes to address class imbalance
+
+    Parameters
+    ----------
+    model: Keras model
+
+    Returns
+    -------
+    model: fitted Keras model
+    '''
+
     _ = change_trainable_layers(model, 132)
     model.compile(optimizer=RMSprop(lr=0.0005), loss='categorical_crossentropy', metrics=['accuracy'])
 
@@ -222,17 +281,18 @@ if __name__ == '__main__':
 
     if load.lower() == 'y':
         model.compile(optimizer=RMSprop(lr=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
-        model.load_weights("../../tmp/1544721035.51357.hdf5")
+        model.load_weights("static/1544982049.165118.hdf5")
+        model.save("static/CS3_model.hdf5")
         print("weights loaded")
 
     elif load.lower() == 'n':
         model = fit_model(model)
         model.load_weights('../../tmp/'+ts+'.hdf5')
 
-    score = make_analysis(test_generator)
+    score = make_analysis(validation_generator)
     print(f'balanced accuracy score is {score}')
 
-    show_confusion(test_generator)
+    show_confusion(validation_generator)
 
     with open('../../tmp/CS3_model.pickle', 'wb') as fileobject:
         pickle.dump(model, fileobject)

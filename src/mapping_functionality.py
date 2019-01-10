@@ -1,4 +1,4 @@
-from mpl_toolkits.basemap import Basemap
+#from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -10,6 +10,18 @@ import matplotlib as mpl
 
 
 def gps_find(info):
+    '''
+    Pulls gps coordinates from Exif tags
+
+    Parameters
+    ----------
+    info: dict
+
+    Returns
+    -------
+    dataframe
+
+    '''
 
     if info.get(34853, None) == None:
         return None
@@ -21,14 +33,30 @@ def gps_find(info):
             coordinates.append(gps_coord)
         return pd.DataFrame([{'latitude':coordinates[0], 'longitude':-1*coordinates[1]}])
 
-def plot_map(coordinates):
+def plot_map(coordinates, new_coordinates):
+    '''
+    Plots a map of japanese beetle sightings in Colorado. Plots new sighting in
+    blue and all others in red.
+
+    Parameters
+    ----------
+    coordinates: dataframe
+    new_coordinates: dataframe
+
+    Returns
+    -------
+    m: basemap object
+    '''
+
     mpl.rcParams.update({
         'font.size'           : 20.0,
         'axes.titlesize'      : 'x-large',
         'axes.labelsize'      : 'medium',
         'xtick.labelsize'     : 'medium',
         'ytick.labelsize'     : 'medium',
-        'legend.fontsize'     : 'large',
+        'legend.fontsize'     : 'x-small',
+        'legend.borderpad'    :  0.5,
+        'legend.handletextpad':  0,
     })
 
     lats = coordinates.latitude.values
@@ -48,10 +76,16 @@ def plot_map(coordinates):
     m.drawmapboundary()
 
     x, y = m(lons, lats)
-
     plt.title('Japanese beetle observations')
-    m.plot(x, y, 'r.')
+    old = m.plot(x, y, 'r.', label ='Existing sightings')
 
+    if new_coordinates is not None:
+        new_lats = new_coordinates.latitude.values
+        new_lons = new_coordinates.longitude.values
+        new_x, new_y = m(new_lons, new_lats)
+        new = m.plot(new_x, new_y, 'b.', label = 'Your data')
+
+    plt.legend()
     return(m)
 
 if __name__ == '__main__':
@@ -61,14 +95,13 @@ if __name__ == '__main__':
     with open("gps_pickle", 'rb') as fileobject:
         gps_df = pickle.load(fileobject)
 
-    # add new data to df
-    image = Image.open("/Users/millie/downloads/20181129_132810.jpg")
+    image = Image.open("/Users/millie/downloads/20181218_093137.jpg")
     info = image._getexif()
     coordinates = gps_find(info)
     if coordinates is not None:
         gps_df = gps_df.append(coordinates)
     print(gps_df)
-    new_map = plot_map(gps_df)
+    new_map = plot_map(gps_df, coordinates)
     plt.savefig('beetle_map')
 
     with open("gps_pickle", "wb") as fileobject:

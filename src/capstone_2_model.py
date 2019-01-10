@@ -7,7 +7,6 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers.convolutional import Conv2D
 from keras.utils import np_utils
 from keras import backend as K
-#from image_process_cs2 import data_preprocess
 from keras.applications.xception import preprocess_input
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, TensorBoard
@@ -21,12 +20,23 @@ import datetime
 from keras import backend as K
 K.tensorflow_backend._get_available_gpus()
 ts = str(datetime.datetime.now().timestamp())
-matplotlib.use('agg')
+#matplotlib.use('agg')
 
 def create_model(nb_classes, img_rows, img_cols, img_layers):
-    '''assembles CNN model layers
-    inputs: number of classes, image size (rows, cols, layers)
-    outputs: model
+    '''
+    assembles CNN model layers
+
+    Parameters
+    ----------
+    nb_classes: int
+    img_rows: int
+    img_cols: int
+    img_layers: int
+
+    Returns
+    -------
+    model: Keras model
+
     '''
 
     nb_filters = 24
@@ -69,11 +79,23 @@ def create_model(nb_classes, img_rows, img_cols, img_layers):
     return model
 
 def generate_data(train_directory, validation_directory, test_directory, img_rows, img_cols, mode = 'rgb'):
-    '''creates data generators for train, validation and test data
-        inputs: paths to image data. Folders should be named with the target.
-                image size (row, cols) and color mode
-        outputs: three data generators.
-        '''
+    '''
+    Creates data generators for train, validation and test data
+    Input strings are paths to image data. Folders should be named with the target.
+
+    Parameters
+    ----------
+    train_directory: str
+    validation_directory: str
+    test_directory: str
+    img_rows: int
+    img_cols: int
+    mode: str
+
+    Returns
+    -------
+    train_generator, test_generator, validation_generator: Keras ImageDataGenerators
+    '''
 
     train_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
@@ -129,8 +151,14 @@ def generate_data(train_directory, validation_directory, test_directory, img_row
 def make_analysis(generator):
     '''
     Computes accuracy of model and displays labeled images for incorrect guesses.
-    inputs: test data generator
-    outputs: balanced accuracy score
+
+    Parameters
+    ----------
+    generator: Keras ImageDataGenerator
+
+    Returns
+    -------
+    score: int
     '''
 
     test_X = generator[0][0]
@@ -162,6 +190,14 @@ def make_analysis(generator):
     return score
 
 def show_confusion(generator):
+    '''
+    Plots confusion matrix for model predictions
+
+    Parameters
+    ----------
+    generator: Keras ImageDataGenerator
+
+    '''
     test_X = generator[0][0]
     test_y = generator.classes
     predicted_y = model.predict_classes(test_X)
@@ -179,6 +215,7 @@ def show_confusion(generator):
                           title='Confusion matrix, without normalization')
 
     plt.savefig('./result_images/'+ts+'confusion_matrix.png')
+
     # Plot normalized confusion matrix
     plt.figure()
     plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
@@ -197,7 +234,6 @@ if __name__ == '__main__':
                   optimizer='adadelta',
                   metrics=['accuracy'])
 
-    ts = str(datetime.datetime.now().timestamp())
     checkpointer = ModelCheckpoint(filepath='../../tmp/'+ts+'.hdf5', verbose=1, save_best_only=True)
     tensorboard = TensorBoard(
                 log_dir='logs/', histogram_freq=0, batch_size=50, write_graph=True, embeddings_freq=0)
@@ -208,7 +244,7 @@ if __name__ == '__main__':
 
     class_weights = {0: 0.4, 1: 0.47, 2: 0.69, 3: 0.41, 4:0.45, 5: 1}
     if load.lower() == 'y':
-        model.load_weights("../../tmp/1544934745.431147.hdf5")
+        model.load_weights("../../tmp/1544981258.541404.hdf5")
         print("weights loaded")
     elif load.lower() == 'n':
         model.fit_generator(train_generator,
@@ -221,4 +257,4 @@ if __name__ == '__main__':
     score = make_analysis(validation_generator)
     print(f'balanced accuracy score is {score}')
 
-    show_confusion(test_generator)
+    show_confusion(validation_generator)
