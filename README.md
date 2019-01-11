@@ -12,22 +12,23 @@ Data cleaning was done using the script developed in part 1 of this project. Sim
 The resulting images represent a class imbalanced dataset with the largest number of images being 251 and the smallest being 100. This was addressed during modeling. The Keras ImageDataGenerator function was used to generate additional data by applying the transformations shift, shear, and horizontal and vertical flip to the original dataset.
 
 ##### Box elder beetle: 251 images
-![img](src/static/0.png)
+<img src="src/static/0.png" width = '300' class="img-thumbnail" align="center" alt="Box elder beetle">
 
 ##### Spotted cucumber beetle: 215 images
-![img](src/static/1.png)
+<img src="src/static/1.png" width = '300' class="img-thumbnail" align="center" alt="Spotted cucumber beetle">
 
 ##### Striped cucumber beetle: 100 images
-![img](src/static/4.png)
+<img src="src/static/4.png" width = '300' class="img-thumbnail" align="center" alt="Striped cucumber beetle">
 
 ##### Ladybug: 223 images
-![img](src/static/3.png)
+<img src="src/static/3.png" width = '300' class="img-thumbnail" align="center" alt="Ladybug">
 
 ##### Emerald ash borer: 145 images
-![img](src/static/2.png)
+<img src="src/static/2.png" width = '300' class="img-thumbnail" align="center" alt="Emerald ash borer">
 
 ##### Japanese beetle: 245 images
-![img](src/static/japanese_beetle.png)
+<img src="src/static/japanese_beetle.png" width = '300' class="img-thumbnail" align="center" alt="Japanese beetle">
+
 
 ### Model
 In Part 1 of this project, a simple CNN was created and trained on three classes of beetles (Japanese, spotted cucumber, and ladybug). This model had only 5 convolutional layers and image size was limited to (100, 100, 3) because it was being trained on a local machine. This model seemed to make mistakes that were color based such as predicting that a Japanese beetle sitting on top of a raspberry was a ladybug.
