@@ -36,10 +36,29 @@ For Part 2 of this project, the models were trained on an AWS EC2 deep learning 
 
 For comparison, the simple CNN was re-fit on the expanded dataset and the results were compared to the transfer learning model. Models were fit with categorical cross-entropy as a loss function. The final models were evaluated using the average recall for each class (balanced accuracy score). Both models used weighted classes during fitting to account for class imbalance.
 
-### Results
+### Results and discussion
+**Simple CNN (Part 1 model):** Balanced accuracy score on holdout data: 81%  
+In spite of weighting the classes, this model had trouble identifying the class with the fewest examples.
 
-### Mapping
+![img](image/simple_cnn.png)
+
+**Transfer learningwith Xception:**
+Balanced accuracy score on holdout data: 100%  
+Because there were only 113 holdout images, it seems likely that there was some degree of chance involved that the model was able to correctly predict every image in the set. Performance could probably be expected to differ somewhat given more images. For comparison, the balanced accuracy score of the validation set was 98%.
+
+![img](image/transfer_learn.png)
 
 ### App
+Visit [neuralbug.net](www.neuralbug.net) to try it out!  
+Once a predictive model was established, an app was created using Flask and deployed with Docker. Images could be uploaded by users and species and location data are collected. The app displays the model's identification of the beetle and a distribution map.
+
+### Mapping
+When a user uploaded an image that was identified as a Japanese beetle, the Python Imaging Library was used to extract EXIF data from images, which contains GPS coordinates. Locational data were added to a Pandas dataframe and stored as a pickle in an AWS S3 bucket. Matplotlib Basemap was used to map the new data along with data submitted by previous users.
+
+![img](src/static/new_map.png)
 
 ### Future Directions
+This project was completed over the course of five days as the final capstone for the [Galvanize Data Science Immersive](https://www.galvanize.com/data-science#curriculum). Because of the limited timeframe, there are aspects of the project that I wish could have been built out more.  
+- Inclusion of additional classes as well as null classes
+- Submitting actual user data for analysis (project was completed in December when beetles are generally not available in Colorado)
+- Live mapping on the website. Although live mapping worked on my local machine, there was difficulty including the basemap library in the docker image and so the map displayed on the site doesn't display the newly submitted data. GPS data is simply being collected and stored in a database at this time.  
